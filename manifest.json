@@ -1,0 +1,39 @@
+{
+  "name": "Gmail Plugin Colored Label",
+  "version": "0.1",
+  "manifest_version": 2,
+  "description": "Gmail Plugin Colored Label",
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["label.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    "jquery-1.10.2.min.js",
+    "gmail.js",
+    "main.js"
+  ],
+  "oauth2": {
+    "client_id": "917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.modify"
+    ]
+  },
+  "content_security_policy": "script-src 'self' https://*.google.com 'unsafe-eval'; object-src 'self'",
+  "permissions": [
+    "identity",
+    "*://*.google.com/*",
+    "*://*.googleapis.com/*",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["base64.js", "background.js"]
+  }
+}
