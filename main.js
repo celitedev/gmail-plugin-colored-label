@@ -23,7 +23,7 @@ var main = function(){
   
   // gmail.observe.on("poll", function(url, body, data, xhr) {
     var currentPage =  gmail.get.current_page();
-    console.log ('current page:',currentPage);
+    // console.log ('current page:',currentPage);
     if (currentPage == 'inbox')
     {
       var mails = gmail.get.visible_emails();
@@ -46,26 +46,34 @@ var main = function(){
     }
   });
 
+  //coloring labels
   gmail.observe.on('load', function(id, url, body, xhr){
-
-    console.log('------------loading is completed---------------');
-    $('div[title="3+ hrs"]').attr('style', function(i, style)
-    {
-        return 'background-color:#00ff00 !important;';
-    });
-    
-    $('div[title="12+ hrs"]').attr('style', function(i, style)
-    {
-        return 'background-color:#ffff00 !important;';
-    });
-    $('div[title="24+ hrs"]').attr('style', function(i, style)
-    {
-        return 'background-color:#ff0000 !important;';
-    });
+    applyColors();
   });
 
 }
 
+function applyColors()
+{
+  // console.log('applying colors');
+  $('div[title="3+ hrs"]').attr('style', function(i, style) {
+    return 'background-color:#00ff00 !important;';
+  });
+    
+  $('div[title="12+ hrs"]').attr('style', function(i, style)
+  {
+    return 'background-color:#ffff00 !important;';
+  });
+
+  $('div[title="24+ hrs"]').attr('style', function(i, style)
+  {
+    return 'background-color:#ff0000 !important;';
+  });
+
+  setTimeout(function(){
+    applyColors();
+  }, 60*1000);
+}
 
 
 
@@ -108,26 +116,21 @@ function applyLabels(mails)
       console.log('last email data', lastEmail.subject, lastEmail.from, lastEmail.datetime);
 
       if (lastEmail.from_email != userEmail) {
-        var timeDiffInHours = (now - lastEmail.timestamp) /1000/60/60;
-        var detail;
-        if (timeDiffInHours >= 24) {
-          detail = {
-            threadId: data.thread_id,
-            labelName: _24LabelName
-          };
-        } else if( timeDiffInHours >= 12) {
-          detail = {
-            threadId: data.thread_id,
-            labelName: _12LabelName
-          };
-        } else if( timeDiffInHours >= 3) {
-          detail = {
-            threadId: data.thread_id, 
-            labelName: _3LabelName
-          };
-        }
+        var timeDiffInHours = (now - lastEmailWriting file /Users/dhorse/Documents/projects/gmail_plugin/ChromeExtension/gmail-plugin-colored-label/main.js with encoding UTF-8
+.timestamp) /1000/60/60;
+        var detail = {
+          action: 'apply_label',
+          timestamp: lastEmail.timestamp,
+          threadId: data.thread_id,
+        };
 
-        detail.action = 'apply_label';
+        if (timeDiffInHours >= 24) {
+          detail.labelName = _24LabelName;
+        } else if( timeDiffInHours >= 12) {
+          detail.labelName = _12LabelName;
+        } else if( timeDiffInHours >= 3) {
+          detail.labelName = _3LabelName;
+        }
 
         var event = new CustomEvent("LB+GP",{
           detail:detail
@@ -140,14 +143,12 @@ function applyLabels(mails)
 
 function removeLabel(emailData) {
   var detail = {
-    action:'remove_labels',
+    action:'remove_label',
     threadId: emailData.first_email
   };
 
-
   var event = new CustomEvent("LB+GP",{
     detail:detail,
-    
   });
   document.dispatchEvent(event);
 }
