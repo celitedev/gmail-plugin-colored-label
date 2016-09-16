@@ -41,8 +41,11 @@ function loadScript(url){
 
 function authorize(){
   gapi.auth.authorize(
-		{
-			client_id: '917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com',
+		{	
+			//dev
+			client_id: '917063644343-8rfcntv7u3l77lm315bkkgeg6ak28lkq.apps.googleusercontent.com',
+			//tony
+			// client_id: '917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com',  
 			immediate: true,
 			scope: 'https://www.googleapis.com/auth/gmail.modify'
 		},
@@ -64,8 +67,8 @@ function loadSettings(){
 function saveSettings() {
 	var json = {};
 	json[sKey] = Settings;
-	chrome.storage.sync.set(json,function(items){
-		console.log('save settings');
+	chrome.storage.sync.set(json,function(){
+		console.log('save settings',Settings);
 	});
 
 
@@ -76,36 +79,59 @@ function gmailAPILoaded(){    //do stuff here
 
     loadSettings();
 
-    // if (!Settings.labelCreated) {
-    	console.log('Gmail API is loaded. Creating labels...');
-    	// Settings.labelCreated = true;
-	    createLabel('24+ hrs', function(label){
-	    	if (label.id != undefined) {
-	    		Settings._24LabelId = label.id;
-	    		saveSettings();
-	    		console.log('created 24+ label', label.id);
-	    	} else
-	    		console.log('3+ label already exist', label.id);
-	    });
-	    createLabel('12+ hrs', function(label){
-	    	if (label.id != undefined) {
-	    		Settings._12LabelId = label.id;
-	    		saveSettings();
-	    		console.log('created 12+ label', label.id);
-	    	} else
-	    		console.log('12+ label already exist', label.id);
-	    });
-	    createLabel('3+ hrs', function(label){
-	    	if (label.id != undefined) {
-	    		Settings._3LabelId = label.id;
-	    		saveSettings();
-	    		console.log('created 24+ label', label.id);
-	    	} else
-	    		console.log('3+ label already exist', label.id);
+    getLabels(function(response){
+    	var labels = response.labels;
 
-	    });
-    // }
+    	console.log('Gmail API is loaded. getting labels...');
+    	labels.forEach(function(label){
+    		if (label.name == '24+ hrs') {
+    			Settings._24LabelId = label.id;
+    		} else if (label.name == '12+ hrs') {
+    			Settings._12LabelId = label.id;
+    		} else if (label.name == '3+ hrs') {
+    			Settings._3LabelId = label.id;
+    		}
+    	});
 
+    	saveSettings();
+
+    	if (undefined == typeof Settings._24LabelId) {
+    		createLabel('24+ hrs', function(label){
+		    	if (label.id != undefined) {
+		    		Settings._24LabelId = label.id;
+		    		saveSettings();
+		    		console.log('created 24+ label', label.id);
+		    	} else
+		    		console.log('3+ label already exist', label.id);
+		    });
+    	}
+
+
+    	if (undefined == typeof Settings._12LabelId) {
+    		createLabel('12+ hrs', function(label){
+		    	if (label.id != undefined) {
+		    		Settings._12LabelId = label.id;
+		    		saveSettings();
+		    		console.log('created 12+ label', label.id);
+		    	} else
+		    		console.log('12+ label already exist', label.id);
+		    });
+    	}
+
+
+    	if (undefined == typeof Settings._3LabelId) {
+    		createLabel('3+ hrs', function(label){
+		    	if (label.id != undefined) {
+		    		Settings._3LabelId = label.id;
+		    		saveSettings();
+		    		console.log('created 3+ label', label.id);
+		    	} else
+		    		console.log('3+ label already exist', label.id);
+
+		    });
+    	}
+    });
+	
     document.addEventListener('LB+GP', function(e){
     	console.log('**BG** event received', e);
     });
@@ -114,16 +140,27 @@ function gmailAPILoaded(){    //do stuff here
 
     	if (message.action == 'apply_label') {
     		applyLabel(message.detail.threadId, message.detail.labelName, function(ret){
-
-    			console.log( ret );
-
+    			console.log('apply_label', ret );
     		});
-    	};
-    	saveSettings();
+    	} else if (message.action == 'remove_label') {
+    		modifyThread(message.detail.threadId, [], [Settings._24LabelId, Settings._12LabelId, Settings._3LabelId]).execute(function(ret){
+    			console.log('remove_label', ret );
+    		});
+    	}
     	return;
     })
 }
 
+function getLabels(callback) {
+  var request = gapi.client.request(
+		{
+			path: 'https://www.googleapis.com/gmail/v1/users/me/labels',
+			method: 'GET'
+		}
+	);
+
+	request.execute(callback);
+}
 
 function createLabel(newLabelName, callback) {
   var request = gapi.client.request(

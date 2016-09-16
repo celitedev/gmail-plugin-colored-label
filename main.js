@@ -14,16 +14,59 @@ function refresh(f) {
 
 var main = function(){
 
+
   gmail = new Gmail();
 
   userEmail = gmail.get.user_email();
-  var mails = gmail.get.visible_emails();
-  applyLabels(mails);
+
+
+  
+  // gmail.observe.on("poll", function(url, body, data, xhr) {
+    var currentPage =  gmail.get.current_page();
+    console.log ('current page:',currentPage);
+    if (currentPage == 'inbox')
+    {
+      var mails = gmail.get.visible_emails();
+      applyLabels(mails);
+    }  
+  // })
 
   gmail.observe.on('delete_label', function(id, url, body, xhr){
     console.log('label deleted:', id, 'url:', url , 'body', body);
   });
+
+  gmail.observe.on("send_message", function(url, body, data, xhr) {
+    if (data.subject.indexOf('Re:') != -1 && data.to[0] != null && data.to[0] != undefined && data.to[0] != userEmail) {
+      var emailData = gmail.get.selected_emails_data();
+      if (emailData != undefined && emailData.length >0)
+      {
+        console.log('remove label. emailData:', emailData[0]);
+        removeLabel(emailData[0]);
+      }
+    }
+  });
+
+  gmail.observe.on('load', function(id, url, body, xhr){
+
+    console.log('------------loading is completed---------------');
+    $('div[title="3+ hrs"]').attr('style', function(i, style)
+    {
+        return 'background-color:#00ff00 !important;';
+    });
+    
+    $('div[title="12+ hrs"]').attr('style', function(i, style)
+    {
+        return 'background-color:#ffff00 !important;';
+    });
+    $('div[title="24+ hrs"]').attr('style', function(i, style)
+    {
+        return 'background-color:#ff0000 !important;';
+    });
+  });
+
 }
+
+
 
 
 function parseDate(dateString)
@@ -79,10 +122,12 @@ function applyLabels(mails)
           };
         } else if( timeDiffInHours >= 3) {
           detail = {
-            threadId: data.thread_id,
+            threadId: data.thread_id, 
             labelName: _3LabelName
           };
         }
+
+        detail.action = 'apply_label';
 
         var event = new CustomEvent("LB+GP",{
           detail:detail
@@ -93,5 +138,18 @@ function applyLabels(mails)
   });
 }
 
+function removeLabel(emailData) {
+  var detail = {
+    action:'remove_labels',
+    threadId: emailData.first_email
+  };
+
+
+  var event = new CustomEvent("LB+GP",{
+    detail:detail,
+    
+  });
+  document.dispatchEvent(event);
+}
 
 refresh(main);
