@@ -193,11 +193,11 @@ function applyLabel(threadId, labelName, callback) {
 	var promise;
 
 	if (labelName == '24+ hrs') {
-		promise = modifyThread (threadId, [Settings._24LabelId], [Settings._12LabelId]);
+		promise = modifyThread (threadId, [Settings._24LabelId], [Settings._12LabelId,Settings._3LabelId]);
 	} else if (labelName == '12+ hrs') {
-		promise = modifyThread (threadId, [Settings._12LabelId], [Settings._3LabelId]);
+		promise = modifyThread (threadId, [Settings._12LabelId], [Settings._3LabelId,Settings._24LabelId]);
 	} else {
-		promise = modifyThread (threadId, [Settings._3LabelId], []);
+		promise = modifyThread (threadId, [Settings._3LabelId], [Settings._24LabelId,Settings._12LabelId]);
 	}
 
 	promise.execute(callback);

@@ -35,13 +35,21 @@ var main = function(){
     console.log('label deleted:', id, 'url:', url , 'body', body);
   });
 
+  gmail.observe.on("delete", function(id, url, body, xhr) {
+    console.log("deleted id:", id);
+
+    id.forEach(function(id){
+      removeLabel(id);
+    });
+  })
+
   gmail.observe.on("send_message", function(url, body, data, xhr) {
     if (data.subject.indexOf('Re:') != -1 && data.to[0] != null && data.to[0] != undefined && data.to[0] != userEmail) {
       var emailData = gmail.get.selected_emails_data();
       if (emailData != undefined && emailData.length >0)
       {
-        console.log('remove label. emailData:', emailData[0]);
-        removeLabel(emailData[0]);
+        // console.log('remove label. emailData:', emailData[0]);
+        removeLabel(emailData[0].first_email);
       }
     }
   });
@@ -49,6 +57,19 @@ var main = function(){
   //coloring labels
   gmail.observe.on('load', function(id, url, body, xhr){
     applyColors();
+  });
+
+  gmail.observe.on("compose", function(compose, type) {
+
+    // type can be compose, reply or forward
+    
+    var label24Count = get24LabelsCount();
+    if ((type == 'compose') && (label24Count > 0)) {
+      alert('You have ' + label24Count + ' 24+ Labeled emails. You\'re not able to send email before reply them.');
+      var dialog = compose.$el.parents('div[role="dialog"]');
+      console.log('compose dialog body:', dialog);
+      dialog.hide();
+    }
   });
 
 }
@@ -72,7 +93,7 @@ function applyColors()
 
   setTimeout(function(){
     applyColors();
-  }, 60*1000);
+  }, 5*1000);
 }
 
 
@@ -113,11 +134,10 @@ function applyLabels(mails)
     
     gmail.get.email_data_async(mail.id, function(data){
       var lastEmail = data.threads[data.last_email];
-      console.log('last email data', lastEmail.subject, lastEmail.from, lastEmail.datetime);
+      // console.log('last email data', lastEmail.subject, lastEmail.from, lastEmail.datetime);
 
       if (lastEmail.from_email != userEmail) {
-        var timeDiffInHours = (now - lastEmailWriting file /Users/dhorse/Documents/projects/gmail_plugin/ChromeExtension/gmail-plugin-colored-label/main.js with encoding UTF-8
-.timestamp) /1000/60/60;
+        var timeDiffInHours = (now - lastEmail.timestamp) /1000/60/60;
         var detail = {
           action: 'apply_label',
           timestamp: lastEmail.timestamp,
@@ -141,16 +161,32 @@ function applyLabels(mails)
   });
 }
 
-function removeLabel(emailData) {
+function removeLabel(id) {
   var detail = {
     action:'remove_label',
-    threadId: emailData.first_email
+    threadId: id
   };
 
   var event = new CustomEvent("LB+GP",{
     detail:detail,
   });
   document.dispatchEvent(event);
+}
+
+function deleteEmail(id) {
+  localStorage.removeItem(id);
+}
+
+function get24LabelsCount(){
+
+  var count = 0;
+  for ( var i = 0, len = localStorage.length; i < len; ++i ) {
+    var detail = JSON.parse(localStorage.getItem(localStorage.key(i)));
+    if (detail.labelName == _24LabelName)
+      count++;
+  }
+
+  return count;
 }
 
 refresh(main);
