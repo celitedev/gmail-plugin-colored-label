@@ -44,7 +44,7 @@ function authorize(){
 		{	
 			//dev
 			client_id: '917063644343-8rfcntv7u3l77lm315bkkgeg6ak28lkq.apps.googleusercontent.com',
-			//tony
+			// tony
 			// client_id: '917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com',  
 			immediate: true,
 			scope: 'https://www.googleapis.com/auth/gmail.modify'
@@ -95,9 +95,9 @@ function gmailAPILoaded(){    //do stuff here
 
     	saveSettings();
 
-    	if (undefined == typeof Settings._24LabelId) {
+    	if ("undefined" == typeof Settings._24LabelId) {
     		createLabel('24+ hrs', function(label){
-		    	if (label.id != undefined) {
+		    	if (label.id != undefined && label.id != null) {
 		    		Settings._24LabelId = label.id;
 		    		saveSettings();
 		    		console.log('created 24+ label', label.id);
@@ -107,9 +107,9 @@ function gmailAPILoaded(){    //do stuff here
     	}
 
 
-    	if (undefined == typeof Settings._12LabelId) {
+    	if ("undefined" == typeof Settings._12LabelId) {
     		createLabel('12+ hrs', function(label){
-		    	if (label.id != undefined) {
+		    	if (label.id != undefined && label.id != null) {
 		    		Settings._12LabelId = label.id;
 		    		saveSettings();
 		    		console.log('created 12+ label', label.id);
@@ -119,9 +119,9 @@ function gmailAPILoaded(){    //do stuff here
     	}
 
 
-    	if (undefined == typeof Settings._3LabelId) {
+    	if ("undefined" == typeof Settings._3LabelId) {
     		createLabel('3+ hrs', function(label){
-		    	if (label.id != undefined) {
+		    	if (label.id != undefined && label.id != null) {
 		    		Settings._3LabelId = label.id;
 		    		saveSettings();
 		    		console.log('created 3+ label', label.id);

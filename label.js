@@ -4,6 +4,22 @@ var _3LabelName = '3+ hrs',
 var isCronRunning = true;
 refreshLabels(5*1000);
 
+
+var saveItem = function(id, value) {
+	var newId = 'GP_' + id;
+	localStorage.setItem(newId, value);
+};
+
+var deleteItem = function(id) {
+	var newId = 'GP_' + id;
+	localStorage.removeItem(newId);
+};
+
+var loadItem = function(id) {
+	var newId = 'GP_' + id;
+	return localStorage.getItem(newId);
+};
+
 document.addEventListener('LB+GP', function(e){
 	// console.log('****CS*****event received', e.detail);
 	
@@ -19,36 +35,40 @@ document.addEventListener('LB+GP', function(e){
 
 
 function addEmail(email) {
-	localStorage.setItem(email.threadId, JSON.stringify(email));
+	saveItem(email.threadId, JSON.stringify(email));
 	if(!isCronRunning) refreshLabels(5*1000);
 }
 
 function removeEmail(email) {
-	localStorage.removeItem(email.threadId);
+	deleteItem(email.threadId);
 }
 
 function refreshLabels(interval) {
 	setTimeout(function(){
 		// console.log('refresh local email labels');
-
+		var count = 0;
 		for ( var i = 0, len = localStorage.length; i < len; ++i ) {
-			var detail = localStorage.getItem(localStorage.key(i)); 
-		  	
-		  	var now = Date.now(),
-	        timeDiffInHours = (now - detail.timestamp) / 1000/60/60;
+			var detail = localStorage.getItem(localStorage.key(i));
 
-	        if (timeDiffInHours >= 24 && detail.labelName != _24LabelName) {
-	          detail.labelName = _24LabelName;
-	        } else if( timeDiffInHours >= 12 && detail.labelName != _12LabelName) {
-	          detail.labelName = _12LabelName;
-	        }
+			if (detail) {
+				var now = Date.now(),
+		        timeDiffInHours = (now - detail.timestamp) / 1000/60/60;
 
-	        chrome.extension.sendMessage({action:detail.action, detail:detail}, function(response) {
-				// console.log( response );
-			});
+		        if (timeDiffInHours >= 24 && detail.labelName != _24LabelName) {
+		          detail.labelName = _24LabelName;
+		        } else if( timeDiffInHours >= 12 && detail.labelName != _12LabelName) {
+		          detail.labelName = _12LabelName;
+		        }
+
+		        chrome.extension.sendMessage({action:detail.action, detail:detail}, function(response) {
+					// console.log( response );
+				});
+
+				count++;
+			}
 		}
 
-		if (localStorage.length > 0)
+		if (count > 0)
 			refreshLabels(interval);
 		else{
 			// console.log('refresh stopped');

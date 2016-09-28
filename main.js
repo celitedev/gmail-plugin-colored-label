@@ -12,6 +12,21 @@ function refresh(f) {
   }
 }
 
+var saveItem = function(id, value) {
+  var newId = 'GP_' + id;
+  localStorage.setItem(newId, value);
+};
+
+var deleteItem = function(id) {
+  var newId = 'GP_' + id;
+  localStorage.removeItem(newId);
+};
+
+var loadItem = function(id) {
+  var newId = 'GP_' + id;
+  return localStorage.getItem(newId);
+};
+
 var main = function(){
 
 
@@ -36,10 +51,8 @@ var main = function(){
   });
 
   gmail.observe.on("delete", function(id, url, body, xhr) {
-    console.log("deleted id:", id);
-
     id.forEach(function(id){
-      removeLabel(id);
+      deleteItem(id);
     });
   })
 
@@ -173,19 +186,22 @@ function removeLabel(id) {
   document.dispatchEvent(event);
 }
 
-function deleteEmail(id) {
-  localStorage.removeItem(id);
-}
-
 function get24LabelsCount(){
 
   var count = 0;
   for ( var i = 0, len = localStorage.length; i < len; ++i ) {
-    var detail = JSON.parse(localStorage.getItem(localStorage.key(i)));
-    if (detail.labelName == _24LabelName)
-      count++;
-  }
+    var key = localStorage.key(i);
 
+    if (key.startsWith('GP_')) {
+      var detail = localStorage.getItem(key);
+      if (detail != undefined && detail != null && 'undefined' != typeof detail) {
+        detail = JSON.parse(detail)
+        if (detail.labelName == _24LabelName)
+          count++;
+      }
+    }
+    
+  }
   return count;
 }
 
