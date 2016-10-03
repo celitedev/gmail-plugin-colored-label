@@ -132,10 +132,6 @@ function gmailAPILoaded(){    //do stuff here
     	}
     });
 	
-    document.addEventListener('LB+GP', function(e){
-    	console.log('**BG** event received', e);
-    });
-
     chrome.extension.onMessage.addListener(function(message, sender, sendResponse){
 
     	if (message.action == 'apply_label') {
@@ -146,9 +142,48 @@ function gmailAPILoaded(){    //do stuff here
     		modifyThread(message.detail.threadId, [], [Settings._24LabelId, Settings._12LabelId, Settings._3LabelId]).execute(function(ret){
     			console.log('remove_label', ret );
     		});
+    	} else if (message.action == 'reset_option') {
+
+    		resetOptions(sendResponse);
+    		
     	}
     	return;
     })
+
+    chrome.extension.onConnect.addListener(function(port) {
+	  console.log("Connected .....");
+	  port.onMessage.addListener(function(msg) {
+		if (msg == 'reset_option')
+			resetOptions(port);
+	  });
+	});
+}
+
+
+function resetOptions(port) {
+
+	var cbPort = port;
+	if (!confirm('Are you sure to reset all labels?')) return;
+
+	deleteLabel(Settings._24LabelId, function(){
+		delete Settings._24LabelId;
+		saveSettings();
+
+		deleteLabel(Settings._12LabelId, function(){
+			delete Settings._12LabelId;
+			saveSettings();
+
+			deleteLabel(Settings._3LabelId, function(){
+				delete Settings._3LabelId;
+				saveSettings();
+				gmailAPILoaded();
+				cbPort.postMessage({success:true});
+			});		
+		});
+	});
+	
+	
+
 }
 
 function getLabels(callback) {

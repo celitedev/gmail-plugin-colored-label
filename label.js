@@ -33,6 +33,18 @@ document.addEventListener('LB+GP', function(e){
 		removeEmail(e.detail);
 });
 
+// Listen for messages from the popup
+chrome.runtime.onMessage.addListener(function (msg, sender, response) {
+  // First, validate the message's structure
+  if ((msg.from === 'popup') && (msg.subject === 'reset_option')) {
+    for ( var i = 0, len = localStorage.length; i < len; ++i ) {
+      var key = localStorage.key(i);
+      if (key.startsWith('GP_')) {
+        localStorage.removeItem(key);
+      }
+    }
+  }
+});
 
 function addEmail(email) {
 	saveItem(email.threadId, JSON.stringify(email));
