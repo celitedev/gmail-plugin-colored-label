@@ -43,9 +43,9 @@ function authorize(){
   gapi.auth.authorize(
 		{	
 			//dev
-			client_id: '917063644343-8rfcntv7u3l77lm315bkkgeg6ak28lkq.apps.googleusercontent.com',
+			// client_id: '917063644343-8rfcntv7u3l77lm315bkkgeg6ak28lkq.apps.googleusercontent.com',
 			// tony
-			// client_id: '917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com',  
+			client_id: '917063644343-8gdgklpcg3t8ml0fir2rl0up1o09h3pm.apps.googleusercontent.com',  
 			immediate: true,
 			scope: 'https://www.googleapis.com/auth/gmail.modify'
 		},

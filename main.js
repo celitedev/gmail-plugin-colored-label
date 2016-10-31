@@ -6,7 +6,7 @@ var _3LabelName = '3+ hrs',
 
 function refresh(f) {
   if( (/in/.test(document.readyState)) || (typeof Gmail === undefined) ) {
-    setTimeout('refresh(' + f + ')', 10);
+    setTimeout('refresh(' + f + ')', 100);
   } else {
     f();
   }

@@ -1470,7 +1470,7 @@ var Gmail_ = function(localJQuery) {
 
   api.tools.make_request = function (link, method) {
     link = decodeURIComponent(link);
-    method  = (typeof method == undefined || typeof method == null) ? 'GET' : method;
+    method  = (typeof method == 'undefined' || typeof method == null) ? 'GET' : method;
 
     var request = $.ajax({ type: method, url: encodeURI(link), async:false });
 
@@ -1480,7 +1480,7 @@ var Gmail_ = function(localJQuery) {
 
   api.tools.make_request_async = function (link, method, callback) {
     link = decodeURIComponent(link);
-    method  = (typeof method == undefined || typeof method == null) ? 'GET' : method;
+    method  = (typeof method == 'undefined' || typeof method == null) ? 'GET' : method;
 
     $.ajax({ type: method, url: encodeURI(link), async:true, dataType: 'text' })
       .done(function(data, textStatus, jqxhr) {
